@@ -19,6 +19,7 @@ import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.Image;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
@@ -31,6 +32,7 @@ import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.PdfWriter;
 
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -80,6 +82,20 @@ public class PDFController {
         float textX;
         float textY;
         PdfContentByte over;
+
+        String path = "";
+        try {
+            ClassPathResource classPathResource = new ClassPathResource("templates/image.png");
+            path = classPathResource.getFile().getAbsolutePath();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Image image = Image.getInstance(path);
+        image.scaleToFit(100, 100);
+        image.setAbsolutePosition(300, 650);
+        over = stamper.getOverContent(1);
+        over.addImage(image);
+
         for (EditPdfParam param : list) {
             over = stamper.getOverContent(param.getPage());
             over.beginText();
@@ -187,7 +203,8 @@ public class PDFController {
 
         // Self font
         // String ttfPath = "src/main/resources/templates/" + "SIMYOU.TTF";
-        // BaseFont baseFont = BaseFont.createFont(ttfPath, BaseFont.COURIER, BaseFont.NOT_EMBEDDED);
+        // BaseFont baseFont = BaseFont.createFont(ttfPath, BaseFont.COURIER,
+        // BaseFont.NOT_EMBEDDED);
 
         // System font
         Font titlefont = FontFactory.getFont(FontFactory.TIMES_ROMAN, 15, Font.BOLD);
@@ -199,7 +216,7 @@ public class PDFController {
             int colNum = head.length;
             File file = new File(targetFilePath);
             file.createNewFile();
-            
+
             document.setPageSize(PageSize.A4);
             PdfWriter.getInstance(document, new FileOutputStream(file));
             document.open();
