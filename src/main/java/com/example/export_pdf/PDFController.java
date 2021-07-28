@@ -126,12 +126,12 @@ public class PDFController {
         // lly = top height, up(0 = bottom, 100 = up 100)
         // urx = text width
         // ury = bottom height
-        ct.setSimpleColumn(new Phrase(new Chunk(text, FontFactory.getFont(FontFactory.HELVETICA, 18, Font.NORMAL))), 30,
-                PageSize.A4.getHeight() - 30, PageSize.A4.getWidth() - 30, 60, 25,
+        ct.setSimpleColumn(new Phrase(new Chunk(text, FontFactory.getFont(FontFactory.TIMES_ROMAN, 11, Font.NORMAL))), 
+                30, PageSize.A4.getHeight() - 30, PageSize.A4.getWidth() - 30, 60, 25,
                 Element.ALIGN_LEFT | Element.ALIGN_TOP);
         int status1 = ct.go();
         System.out.println(status1);
-        
+
         document.close();
     }
 
