@@ -25,6 +25,8 @@ import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.ColumnText;
 import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.PdfWriter;
@@ -126,7 +128,7 @@ public class PDFController {
         // lly = top height, up(0 = bottom, 100 = up 100)
         // urx = text width
         // ury = bottom height
-        ct.setSimpleColumn(new Phrase(new Chunk(text, FontFactory.getFont(FontFactory.TIMES_ROMAN, 11, Font.NORMAL))), 
+        ct.setSimpleColumn(new Phrase(new Chunk(text, FontFactory.getFont(FontFactory.TIMES_ROMAN, 11, Font.NORMAL))),
                 30, PageSize.A4.getHeight() - 30, PageSize.A4.getWidth() - 30, 60, 25,
                 Element.ALIGN_LEFT | Element.ALIGN_TOP);
         int status1 = ct.go();
@@ -167,5 +169,99 @@ public class PDFController {
             }
         }
 
+    }
+
+    @RequestMapping("/createPDFTable")
+    public void createPDFTable(HttpServletResponse response) throws IOException, DocumentException {
+        String title = "\n\n\n\n\n\n\n\nReport\n\nMerchant: AAA SDN BHD\n\nDate : 04-07-2021";
+        String[] head = { "Outlet", "Collection Date", "User ID", "Agreement No", "Name", "Amount (RM)" };
+        List<String[]> list = new ArrayList<String[]>();
+        String[] data = { "00002-000", "10-11-2021", "AAA", "12345678901", "Hello World", "2910.00" };
+        for (int i = 0; i < 50; i++) {
+            list.add(data);
+        }
+
+        String targetPath = "C://Users//Koon Fung Yee//Desktop/";
+        String fileName = "sample2.pdf";
+        String targetFilePath = targetPath + fileName;
+
+        // Self font
+        // String ttfPath = "src/main/resources/templates/" + "SIMYOU.TTF";
+        // BaseFont baseFont = BaseFont.createFont(ttfPath, BaseFont.COURIER, BaseFont.NOT_EMBEDDED);
+
+        // System font
+        Font titlefont = FontFactory.getFont(FontFactory.TIMES_ROMAN, 15, Font.BOLD);
+        Font headerfont = FontFactory.getFont(FontFactory.TIMES_ROMAN, 11, Font.BOLD);
+        Font textfont = FontFactory.getFont(FontFactory.TIMES_ROMAN, 9, Font.BOLD);
+
+        Document document = new Document();
+        try {
+            int colNum = head.length;
+            File file = new File(targetFilePath);
+            file.createNewFile();
+            
+            document.setPageSize(PageSize.A4);
+            PdfWriter.getInstance(document, new FileOutputStream(file));
+            document.open();
+
+            // Create table
+            PdfPTable table = new PdfPTable(colNum);
+            float[] f = new float[6];
+            f[0] = 60F;
+            f[1] = 80F;
+            f[2] = 80F;
+            f[3] = 70F;
+            f[4] = 170F;
+            f[5] = 60F;
+            table.setTotalWidth(520);
+            table.setLockedWidth(true);
+            table.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.setWidths(f);
+            table.getDefaultCell().setBorder(1);
+
+            // Create title
+            table.addCell(createCell(title, titlefont, Element.ALIGN_LEFT, colNum, false));
+
+            // Create table header
+            for (int i = 0; i < colNum; i++) {
+                table.addCell(createCell(head[i], headerfont, Element.ALIGN_CENTER, 1, true));
+            }
+
+            if (null != list && list.size() > 0) {
+                for (String[] strs : list) {
+                    for (int i = 0; i < strs.length; i++) {
+                        if (i == 0 || i == 1 || i == 3) {
+                            table.addCell(createCell(strs[i], textfont, Element.ALIGN_CENTER, 1, true));
+                        } else if (i == strs.length - 1) {
+                            table.addCell(createCell(strs[i], textfont, Element.ALIGN_RIGHT, 1, true));
+                        } else {
+                            table.addCell(createCell(strs[i], textfont, Element.ALIGN_LEFT, 1, true));
+                        }
+                    }
+                }
+            }
+            document.add(table);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (document != null) {
+                document.close();
+            }
+        }
+    }
+
+    static private PdfPCell createCell(String value, Font font, int align, int colspan, boolean boderFlag) {
+        PdfPCell cell = new PdfPCell();
+        cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        cell.setHorizontalAlignment(align);
+        cell.setColspan(colspan);
+        cell.setPhrase(new Phrase(value, font));
+        cell.setPadding(3.0f);
+        if (!boderFlag) {
+            cell.setBorder(0);
+            cell.setPaddingTop(15.0f);
+            cell.setPaddingBottom(8.0f);
+        }
+        return cell;
     }
 }
